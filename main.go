@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/base64"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -15,12 +16,11 @@ func main() {
 	args := os.Args[1:]
 
 	url := args[0]
-	orgUnitId := args[1]
-	orgUnitCode := args[2]
-	username := args[3]
-	password := args[4]
-
-	makeRequest(url, orgUnitId, orgUnitCode, username, password)
+	username := args[2]
+	password := args[3]
+	org_file := args[1]
+	records := readCSV(org_file)
+	makeRequests(records, url, username, password)
 }
 
 func makeRequest(instanceUrl string, orgUnitId string, orgUnitCode string, username string, password string) {
@@ -61,4 +61,29 @@ func makeRequest(instanceUrl string, orgUnitId string, orgUnitCode string, usern
 
 func generateCode() string {
 	return ""
+}
+
+func readCSV(fileName string) [][]string {
+	file, err := os.Open(fileName)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+	records, err := reader.ReadAll()
+	if err != nil {
+		panic(err)
+	}
+
+	return records
+}
+
+func makeRequests(records [][]string, instanceUrl string, username string, password string) {
+	for _, record := range records {
+		orgUnitId := record[1]
+		orgUnitCode := record[3]
+		makeRequest(instanceUrl, orgUnitId, orgUnitCode, username, password)
+	}
 }
