@@ -26,7 +26,15 @@ func main() {
 func makeRequest(instanceUrl string, orgUnitId string, orgUnitCode string, username string, password string) {
 	url := instanceUrl + "/api/organisationUnits/" + orgUnitId
 	fmt.Println(url)
-	payload := map[string]string{"code": orgUnitCode}
+	
+	// Use a map[string]interface{} to handle nil values
+	payload := map[string]interface{}{}
+	if orgUnitCode != "" {
+		payload["code"] = orgUnitCode
+	} else {
+		payload["code"] = nil  // Explicitly set to null in JSON
+	}
+	
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		fmt.Println(err)
@@ -51,7 +59,7 @@ func makeRequest(instanceUrl string, orgUnitId string, orgUnitCode string, usern
 	defer resp.Body.Close()
 
 	fmt.Println(time.Now(), " : ", resp.Status)
-	bodyBytes, err := io.ReadAll(resp.Body) // Read the
+	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println(err)
 	}
